@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudio ECEN - Versión Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #f5f5f5;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .section {
+            margin-bottom: 40px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .team-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .team-member {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .areas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .area-item {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .success {
+            color: green;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Estudio ECEN</h1>
+            <p>Versión simple para probar la conexión con el backend</p>
+        </header>
+
+        <div class="section">
+            <h2>Nuestro Equipo</h2>
+            <button id="load-team">Cargar Equipo desde API</button>
+            <div id="team-container" class="team-container">
+                <!-- Team members will be loaded here -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Áreas de Práctica</h2>
+            <button id="load-areas">Cargar Áreas desde API</button>
+            <div id="areas-container" class="areas-container">
+                <!-- Practice areas will be loaded here -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Contacto</h2>
+            <form id="contact-form">
+                <div class="form-group">
+                    <label for="name">Nombre:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono:</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="message">Mensaje:</label>
+                    <textarea id="message" name="message" rows="4" required></textarea>
+                </div>
+                <button type="submit">Enviar Mensaje</button>
+                <div id="form-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API base URL
+        const API_URL = 'http://localhost:5000/api';
+
+        // Function to load team members
+        document.getElementById('load-team').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_URL}/team`);
+                const data = await response.json();
+                
+                const teamContainer = document.getElementById('team-container');
+                teamContainer.innerHTML = '';
+                
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(member => {
+                        const memberElement = document.createElement('div');
+                        memberElement.className = 'team-member';
+                        memberElement.innerHTML = `
+                            <h3>${member.name}</h3>
+                            <p><strong>${member.position}</strong></p>
+                            <p>${member.bio}</p>
+                        `;
+                        teamContainer.appendChild(memberElement);
+                    });
+                } else {
+                    // Load sample data if API returns empty
+                    const sampleMembers = [
+                        {
+                            name: "Dr. Carlos Martínez",
+                            position: "Socio Director - Especialista en Derecho Penal",
+                            bio: "Licenciado en Derecho por la Universidad Nacional, con Maestría en Derecho Penal."
+                        },
+                        {
+                            name: "Dra. Elena Torres",
+                            position: "Socia - Especialista en Derecho Civil",
+                            bio: "Doctora en Derecho por la Universidad Central. Su práctica se centra en litigios civiles complejos."
+                        }
+                    ];
+                    
+                    sampleMembers.forEach(member => {
+                        const memberElement = document.createElement('div');
+                        memberElement.className = 'team-member';
+                        memberElement.innerHTML = `
+                            <h3>${member.name}</h3>
+                            <p><strong>${member.position}</strong></p>
+                            <p>${member.bio}</p>
+                        `;
+                        teamContainer.appendChild(memberElement);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching team members:', error);
+                document.getElementById('team-container').innerHTML = 
+                    '<p class="error">Error al cargar el equipo. Verifica que el backend esté funcionando.</p>';
+            }
+        });
+
+        // Function to load practice areas
+        document.getElementById('load-areas').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_URL}/areas`);
+                const data = await response.json();
+                
+                const areasContainer = document.getElementById('areas-container');
+                areasContainer.innerHTML = '';
+                
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(area => {
+                        const areaElement = document.createElement('div');
+                        areaElement.className = 'area-item';
+                        areaElement.innerHTML = `
+                            <h3>${area.title}</h3>
+                            <p>${area.description}</p>
+                        `;
+                        areasContainer.appendChild(areaElement);
+                    });
+                } else {
+                    // Load sample data if API returns empty
+                    const sampleAreas = [
+                        {
+                            title: "Derecho Penal",
+                            description: "Defensa penal, compliance y asesoramiento en procesos penales"
+                        },
+                        {
+                            title: "Derecho Civil",
+                            description: "Asesoramiento en contratos, responsabilidad civil y derecho de familia"
+                        },
+                        {
+                            title: "Derecho Laboral",
+                            description: "Relaciones laborales, convenios colectivos y seguridad social"
+                        }
+                    ];
+                    
+                    sampleAreas.forEach(area => {
+                        const areaElement = document.createElement('div');
+                        areaElement.className = 'area-item';
+                        areaElement.innerHTML = `
+                            <h3>${area.title}</h3>
+                            <p>${area.description}</p>
+                        `;
+                        areasContainer.appendChild(areaElement);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching areas:', error);
+                document.getElementById('areas-container').innerHTML = 
+                    '<p class="error">Error al cargar las áreas. Verifica que el backend esté funcionando.</p>';
+            }
+        });
+
+        // Function to submit contact form
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formMessage = document.getElementById('form-message');
+            formMessage.innerHTML = '';
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                message: document.getElementById('message').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    formMessage.innerHTML = '<p class="success">Mensaje enviado correctamente</p>';
+                    document.getElementById('contact-form').reset();
+                } else {
+                    formMessage.innerHTML = `<p class="error">Error: ${data.message || 'Error al enviar el mensaje'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                formMessage.innerHTML = '<p class="error">Error al conectar con el servidor. Verifica que el backend esté funcionando.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
